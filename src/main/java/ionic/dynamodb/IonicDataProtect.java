@@ -52,17 +52,7 @@ import java.io.IOException;
 import org.json.JSONObject;
 
 //ADD IONIC IMPORTS HERE
-import com.ionic.sdk.agent.Agent;
-import com.ionic.sdk.device.profile.persistor.DeviceProfilePersistorBase;
-import com.ionic.sdk.device.profile.persistor.DeviceProfilePersistorPlainText;
-import com.ionic.sdk.error.SdkException;
-import com.ionic.sdk.agent.cipher.chunk.ChunkCipherV2;
-import com.ionic.sdk.agent.cipher.chunk.data.ChunkCryptoEncryptAttributes;
-import com.ionic.sdk.agent.key.KeyAttributesMap;
-import com.ionic.sdk.agent.cipher.chunk.data.ChunkCryptoChunkInfo;
-import com.ionic.sdk.agent.request.getkey.GetKeysResponse;
-import com.ionic.sdk.agent.request.getkey.GetKeysResponse.Key;
-import com.ionic.sdk.agent.request.updatekey.UpdateKeysResponse;
+
 //
 
 public class IonicDataProtect
@@ -287,9 +277,7 @@ public class IonicDataProtect
         String post_id = UUID.randomUUID().toString();
 
 //ADD CODE HERE
-        if(profile_path != null) {
-            body = encryptPost(body, profile_path, user, classification);
-        }
+
 //
 
         HashMap<String,AttributeValue> item_values = new HashMap<String,AttributeValue>();
@@ -369,9 +357,7 @@ public class IonicDataProtect
             body = result.get("body").getS();
 
 //ADD CODE HERE          
-            if(profile_path != null) {
-                body = decryptPost(body, profile_path);
-            }
+
 //
 
         } catch(AmazonServiceException e) {
@@ -386,260 +372,31 @@ public class IonicDataProtect
 
     private static String encryptPost(String pt_post_body, String profile_path, String user, String classification) {
 //ADD CODE HERE
-        String ct_post_body = null;
-
-        try {
-            Agent isAgent = new Agent();
-            DeviceProfilePersistorPlainText ptPersistor = new DeviceProfilePersistorPlainText(profile_path);
-            isAgent.initialize(ptPersistor);
-
-            KeyAttributesMap mutableKeyAttrs = new KeyAttributesMap();
-
-            if(user != null) {
-                List<String> ionic_permit_user_by_email_vals = new ArrayList<String>();
-                ionic_permit_user_by_email_vals.add(user);
-                mutableKeyAttrs.set("ionic-permit-user-by-email", ionic_permit_user_by_email_vals);
-            }
-
-            if(classification != null) {
-                List<String> classification_vals = new ArrayList<String>();
-                classification_vals.add(classification);
-                mutableKeyAttrs.set("classification", classification_vals);
-            }
-
-            ChunkCryptoEncryptAttributes attrs = new ChunkCryptoEncryptAttributes(new KeyAttributesMap(), mutableKeyAttrs);
-
-            ChunkCipherV2 cipher = new ChunkCipherV2(isAgent);
-            ct_post_body = cipher.encrypt(pt_post_body, attrs);
-        } catch(SdkException e) {
-            System.out.println(e);
-            if(e.getReturnCode() == 40022) {
-                System.out.println("Profile does not exist");
-            }
-            //Fail Open -- Continue with plaintext body
-            ct_post_body = pt_post_body;
-        }
-
-        return ct_post_body;
+    return null;
 //
     }
  
     public static String decryptPost(String ct_post_body, String profile_path) {
 //ADD CODE HERE
-         String pt_post_body = null;
-
-         try {
-             Agent isAgent = new Agent();
-             DeviceProfilePersistorPlainText ptPersistor = new DeviceProfilePersistorPlainText(profile_path);
-             isAgent.initialize(ptPersistor);
-
-             ChunkCipherV2 cipher = new ChunkCipherV2(isAgent);
-             pt_post_body = cipher.decrypt(ct_post_body);
-         } catch (SdkException e) {
-             System.out.println(e);
-             if(e.getReturnCode() == 40022) {
-                 System.out.println("Profile does not exist");
-                 pt_post_body = ct_post_body;
-             }
-             if(e.getReturnCode() == 40024) {
-                 System.out.println("Key request denied");
-                 pt_post_body = "*ACCESS DENIED*";
-             }
-             else {
-                 pt_post_body = ct_post_body;
-             }
-         }
-
-         return pt_post_body;
+    return null;
 //
     }
 
     public static void listAccess(String project_name, String post_id, String profile_path) {
 //ADD CODE HERE
 
-        Map<String,AttributeValue> result = getPost(project_name, post_id, profile_path);
-
-        String ct_post_body = result.get("body").getS();
-
-        try {
-            Agent isAgent = new Agent();
-            DeviceProfilePersistorPlainText ptPersistor = new DeviceProfilePersistorPlainText(profile_path);
-            isAgent.initialize(ptPersistor);
-
-            ChunkCipherV2 cipher = new ChunkCipherV2(isAgent);
-
-            ChunkCryptoChunkInfo info = cipher.getChunkInfo(ct_post_body);
-
-            String key_id = info.getKeyId();
-
-            GetKeysResponse response = isAgent.getKey(key_id);
-
-            List<GetKeysResponse.Key> keys = response.getKeys();
-
-            if(keys.isEmpty()) {
-                System.out.println("empty key response");
-                System.exit(1);
-            }
-
-            System.out.format("%s%s\n", "Access for: ", key_id);
-            System.out.format("%s\n", StringUtils.repeat("-", 40));
-            System.out.format("\n");
-            for(GetKeysResponse.Key key : keys) {
-                KeyAttributesMap keyAttr = key.getMutableAttributes();
-
-                if(keyAttr == null) {
-                    System.out.format("\n");
-                    continue;
-                }
-
-                System.out.format("%s\n", "classification");
-                System.out.format("%s\n", StringUtils.repeat("-", 20));
-                if(keyAttr.containsKey("classification")) {
-                    List<String> classificatons = keyAttr.get("classification");
-
-                    for(String classification : classificatons) {
-                        System.out.println(classification);
-                    }
-                }
-                System.out.format("\n");
-
-                System.out.format("%s\n", "ionic-permit-user-by-email");
-                System.out.format("%s\n", StringUtils.repeat("-", 20));
-                if(keyAttr.containsKey("ionic-permit-user-by-email")) {
-                    List<String> permitted_emails = keyAttr.get("ionic-permit-user-by-email");
-
-                    for(String email : permitted_emails) {
-                        System.out.println(email);
-                    }
-                }
-                System.out.format("\n");
-            }
-
-        } catch (SdkException e) {
-            System.out.println(e);
-            if(e.getReturnCode() == 40022) {
-                System.out.println("Profile does not exist");
-            }
-            else if(e.getReturnCode() == 40024) {
-                System.out.println("Access request denied");
-            }
-            System.exit(1);
-        }
 //
     }
 
     public static void addUser(String project_name, String post_id, String user_email, String profile_path) {
 //ADD CODE HERE
-        Map<String,AttributeValue> result = getPost(project_name, post_id, profile_path);
 
-        String ct_post_body = result.get("body").getS();
-
-        try {
-            Agent isAgent = new Agent();
-            DeviceProfilePersistorPlainText ptPersistor = new DeviceProfilePersistorPlainText(profile_path);
-            isAgent.initialize(ptPersistor);
-
-            ChunkCipherV2 cipher = new ChunkCipherV2(isAgent);
-
-            ChunkCryptoChunkInfo info = cipher.getChunkInfo(ct_post_body);
-
-            String key_id = info.getKeyId();
-
-            GetKeysResponse response = isAgent.getKey(key_id);
-
-            List<GetKeysResponse.Key> keys = response.getKeys();
-
-            if(keys.isEmpty()) {
-                System.out.println("empty key response");
-                System.exit(1);
-            }
-
-            for(GetKeysResponse.Key key : keys) {
-            KeyAttributesMap keyAttr = key.getMutableAttributes();
-
-                if(keyAttr == null) {
-                    System.out.format("\n");
-                    continue;
-                }
-
-                List<String> ionic_permit_user_by_email_vals = null;
-                if(keyAttr.containsKey("ionic-permit-user-by-email")) {
-                    ionic_permit_user_by_email_vals = keyAttr.get("ionic-permit-user-by-email");
-                }
-                else {
-                    ionic_permit_user_by_email_vals = new ArrayList<String>();
-                }
-
-                ionic_permit_user_by_email_vals.add(user_email);
-                keyAttr.set("ionic-permit-user-by-email", ionic_permit_user_by_email_vals);
-
-                UpdateKeysResponse update = isAgent.updateKey(key, true);
-            }
-        } catch (SdkException e) {
-            System.out.println(e);
-            if(e.getReturnCode() == 40022) {
-                System.out.println("Profile does not exist");
-            }
-            else if(e.getReturnCode() == 40024) {
-                System.out.println("Access request denied");
-            }
-            System.exit(1);
-        }
 //
     }
 
     public static void updateClassification(String project_name, String post_id, String classification, String profile_path) {
 //ADD CODE HERE
-        Map<String,AttributeValue> result = getPost(project_name, post_id, profile_path);
 
-        String ct_post_body = result.get("body").getS();
-
-        try {
-            Agent isAgent = new Agent();
-            DeviceProfilePersistorPlainText ptPersistor = new DeviceProfilePersistorPlainText(profile_path);
-            isAgent.initialize(ptPersistor);
-
-            ChunkCipherV2 cipher = new ChunkCipherV2(isAgent);
-
-            ChunkCryptoChunkInfo info = cipher.getChunkInfo(ct_post_body);
-
-            String key_id = info.getKeyId();
-
-            GetKeysResponse response = isAgent.getKey(key_id);
-
-            List<GetKeysResponse.Key> keys = response.getKeys();
-
-            if(keys.isEmpty()) {
-                System.out.println("empty key response");
-                System.exit(1);
-            }
-
-            for(GetKeysResponse.Key key : keys) {
-                KeyAttributesMap keyAttr = key.getMutableAttributes();
-
-                if(keyAttr == null) {
-                    System.out.format("\n");
-                    continue;
-                }
-
-                List<String> classification_vals = new ArrayList<String>();
-                classification_vals.add(classification);
-                keyAttr.set("classification", classification_vals);
-
-                UpdateKeysResponse update = isAgent.updateKey(key, true);
-
-            }
-
-        } catch (SdkException e) {
-            System.out.println(e);
-            if(e.getReturnCode() == 40022) {
-                System.out.println("Profile does not exist");
-            }
-            else if(e.getReturnCode() == 40024) {
-                System.out.println("Access request denied");
-            }
-            System.exit(1);
-        }
 //
     }
 }
