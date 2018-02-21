@@ -411,7 +411,7 @@ public class IonicDataProtect
 
             ChunkCipherV2 cipher = new ChunkCipherV2(isAgent);
             ct_post_body = cipher.encrypt(pt_post_body, attrs);
-        } catch(SdkException e) {
+        } catch (SdkException e) {
             System.out.println(e);
             if(e.getReturnCode() == 40022) {
                 System.out.println("Profile does not exist");
