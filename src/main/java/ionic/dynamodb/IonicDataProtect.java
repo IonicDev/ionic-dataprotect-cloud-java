@@ -51,7 +51,7 @@ import java.io.IOException;
 
 import org.json.JSONObject;
 
-//ADD IONIC IMPORTS HERE
+//TODO: ADD IONIC IMPORTS HERE
 import com.ionic.sdk.agent.Agent;
 import com.ionic.sdk.device.profile.persistor.DeviceProfilePersistorBase;
 import com.ionic.sdk.device.profile.persistor.DeviceProfilePersistorPlainText;
@@ -286,7 +286,7 @@ public class IonicDataProtect
         String body = post_json.getString("body");
         String post_id = UUID.randomUUID().toString();
 
-//ADD CODE HERE
+//TODO: ADD CODE HERE
         if(profile_path != null) {
             body = encryptPost(body, profile_path, user, classification);
         }
@@ -368,7 +368,7 @@ public class IonicDataProtect
             title = result.get("title").getS();
             body = result.get("body").getS();
 
-//ADD CODE HERE          
+//TODO: ADD CODE HERE          
             if(profile_path != null) {
                 body = decryptPost(body, profile_path);
             }
@@ -385,7 +385,7 @@ public class IonicDataProtect
     }
 
     private static String encryptPost(String pt_post_body, String profile_path, String user, String classification) {
-//ADD CODE HERE
+//TODO: ADD CODE HERE
         String ct_post_body = null;
 
         try {
@@ -413,7 +413,7 @@ public class IonicDataProtect
             ct_post_body = cipher.encrypt(pt_post_body, attrs);
         } catch (SdkException e) {
             System.out.println(e);
-            if(e.getReturnCode() == 40022) {
+            if(e.getReturnCode() == AgentErrorModuleConstants.ISAGENT_NO_DEVICE_PROFILE.value()) {
                 System.out.println("Profile does not exist");
             }
             //Fail Open -- Continue with plaintext body
@@ -425,7 +425,7 @@ public class IonicDataProtect
     }
  
     public static String decryptPost(String ct_post_body, String profile_path) {
-//ADD CODE HERE
+//TODO: ADD CODE HERE
          String pt_post_body = null;
 
          try {
@@ -437,11 +437,11 @@ public class IonicDataProtect
              pt_post_body = cipher.decrypt(ct_post_body);
          } catch (SdkException e) {
              System.out.println(e);
-             if(e.getReturnCode() == 40022) {
+             if(e.getReturnCode() == AgentErrorModuleConstants.ISAGENT_NO_DEVICE_PROFILE.value()) {
                  System.out.println("Profile does not exist");
                  pt_post_body = ct_post_body;
              }
-             if(e.getReturnCode() == 40024) {
+             if(e.getReturnCode() == AgentErrorModuleConstants.ISAGENT_KEY_DENIED.value()) {
                  System.out.println("Key request denied");
                  pt_post_body = "*ACCESS DENIED*";
              }
@@ -455,7 +455,7 @@ public class IonicDataProtect
     }
 
     public static void listAccess(String project_name, String post_id, String profile_path) {
-//ADD CODE HERE
+//TODO: ADD CODE HERE
 
         Map<String,AttributeValue> result = getPost(project_name, post_id, profile_path);
 
@@ -517,10 +517,10 @@ public class IonicDataProtect
 
         } catch (SdkException e) {
             System.out.println(e);
-            if(e.getReturnCode() == 40022) {
+            if(e.getReturnCode() == AgentErrorModuleConstants.ISAGENT_NO_DEVICE_PROFILE.value()) {
                 System.out.println("Profile does not exist");
             }
-            else if(e.getReturnCode() == 40024) {
+            else if(e.getReturnCode() == AgentErrorModuleConstants.ISAGENT_KEY_DENIED.value()) {
                 System.out.println("Access request denied");
             }
             System.exit(1);
@@ -529,7 +529,7 @@ public class IonicDataProtect
     }
 
     public static void addUser(String project_name, String post_id, String user_email, String profile_path) {
-//ADD CODE HERE
+//TODO: ADD CODE HERE
         Map<String,AttributeValue> result = getPost(project_name, post_id, profile_path);
 
         String ct_post_body = result.get("body").getS();
@@ -577,10 +577,10 @@ public class IonicDataProtect
             }
         } catch (SdkException e) {
             System.out.println(e);
-            if(e.getReturnCode() == 40022) {
+            if(e.getReturnCode() == AgentErrorModuleConstants.ISAGENT_NO_DEVICE_PROFILE.value()) {
                 System.out.println("Profile does not exist");
             }
-            else if(e.getReturnCode() == 40024) {
+            else if(e.getReturnCode() == AgentErrorModuleConstants.ISAGENT_KEY_DENIED.value()) {
                 System.out.println("Access request denied");
             }
             System.exit(1);
@@ -589,7 +589,7 @@ public class IonicDataProtect
     }
 
     public static void updateClassification(String project_name, String post_id, String classification, String profile_path) {
-//ADD CODE HERE
+//TODO: ADD CODE HERE
         Map<String,AttributeValue> result = getPost(project_name, post_id, profile_path);
 
         String ct_post_body = result.get("body").getS();
@@ -632,10 +632,10 @@ public class IonicDataProtect
 
         } catch (SdkException e) {
             System.out.println(e);
-            if(e.getReturnCode() == 40022) {
+            if(e.getReturnCode() == AgentErrorModuleConstants.ISAGENT_NO_DEVICE_PROFILE.value()) {
                 System.out.println("Profile does not exist");
             }
-            else if(e.getReturnCode() == 40024) {
+            else if(e.getReturnCode() == AgentErrorModuleConstants.ISAGENT_KEY_DENIED.value()) {
                 System.out.println("Access request denied");
             }
             System.exit(1);
