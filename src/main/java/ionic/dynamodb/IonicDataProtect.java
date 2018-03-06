@@ -51,7 +51,7 @@ import java.io.IOException;
 
 import org.json.JSONObject;
 
-//ADD IONIC IMPORTS HERE
+//TODO: ADD IONIC IMPORTS HERE
 
 //
 
@@ -276,7 +276,7 @@ public class IonicDataProtect
         String body = post_json.getString("body");
         String post_id = UUID.randomUUID().toString();
 
-//ADD CODE HERE
+//TODO: ADD CODE HERE
 
 //
 
@@ -356,7 +356,7 @@ public class IonicDataProtect
             title = result.get("title").getS();
             body = result.get("body").getS();
 
-//ADD CODE HERE          
+//TODO: ADD CODE HERE          
 
 //
 
@@ -371,31 +371,31 @@ public class IonicDataProtect
     }
 
     private static String encryptPost(String pt_post_body, String profile_path, String user, String classification) {
-//ADD CODE HERE
+//TODO: ADD CODE HERE
     return null;
 //
     }
  
     public static String decryptPost(String ct_post_body, String profile_path) {
-//ADD CODE HERE
+//TODO: ADD CODE HERE
     return null;
 //
     }
 
     public static void listAccess(String project_name, String post_id, String profile_path) {
-//ADD CODE HERE
+//TODO: ADD CODE HERE
 
 //
     }
 
     public static void addUser(String project_name, String post_id, String user_email, String profile_path) {
-//ADD CODE HERE
+//TODO: ADD CODE HERE
 
 //
     }
 
     public static void updateClassification(String project_name, String post_id, String classification, String profile_path) {
-//ADD CODE HERE
+//TODO: ADD CODE HERE
 
 //
     }
